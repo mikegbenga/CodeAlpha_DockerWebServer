@@ -64,7 +64,7 @@ cmd_stop()    { say "Graceful stop (SIGQUIT, 10s timeout)"; docker stop -t 10 "$
 cmd_restart() { docker restart "$NAME" >/dev/null && wait_healthy; }
 cmd_pause()   { docker pause "$NAME" && ok "paused (processes frozen)"; }
 cmd_unpause() { docker unpause "$NAME" && ok "resumed"; }
-cmd_rm()      { docker rm -f "$NAME" >/dev/null 2>&1 && ok "removed $NAME" || ok "$NAME not present"; }
+cmd_rm()      { if docker rm -f "$NAME" >/dev/null 2>&1; then ok "removed $NAME"; else ok "$NAME not present"; fi; }
 cmd_clean()   { cmd_rm; docker image rm "$IMAGE:$TAG" 2>/dev/null || true; docker image prune -f >/dev/null; ok "cleaned"; }
 
 cmd_status() {
@@ -108,7 +108,8 @@ cmd_test() {
   if docker exec "$NAME" sh -c 'touch /usr/share/nginx/html/x' 2>/dev/null; then echo "✖ root fs is writable"; else ok "read-only root filesystem"; pass=$((pass+1)); fi
   total=$((total+1))
   if [ "$(docker exec "$NAME" id -u)" != "0" ]; then ok "runs as non-root (uid $(docker exec "$NAME" id -u))"; pass=$((pass+1)); else echo "✖ running as root"; fi
-  echo; [ "$pass" = "$total" ] && ok "$pass/$total checks passed" || fail "$pass/$total checks passed"
+  echo
+  if [ "$pass" = "$total" ]; then ok "$pass/$total checks passed"; else fail "$pass/$total checks passed"; fi
 }
 
 cmd_crash_test() {
@@ -119,7 +120,7 @@ cmd_crash_test() {
   docker exec "$NAME" nginx -s stop || true
   sleep 3
   local after; after=$(docker inspect -f '{{.RestartCount}}' "$NAME")
-  [ "$after" -gt "$before" ] && ok "restart policy recovered the container (restarts: $before → $after)" || fail "container was not restarted"
+  if [ "$after" -gt "$before" ]; then ok "restart policy recovered the container (restarts: $before → $after)"; else fail "container was not restarted"; fi
   wait_healthy
 }
 
