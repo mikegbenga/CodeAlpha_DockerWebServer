@@ -1,0 +1,18 @@
+groups:
+  - name: nginx
+    rules:
+      - alert: NginxDown
+        expr: nginx_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "NGINX is down (exporter cannot reach stub_status)"
+
+      - alert: NginxHighActiveConnections
+        expr: nginx_connections_active > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "NGINX has {{ $value }} active connections"

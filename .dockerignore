@@ -1,0 +1,9 @@
+.git
+.github
+docs
+scripts
+monitoring
+*.md
+Makefile
+docker-compose*.yml
+.env*

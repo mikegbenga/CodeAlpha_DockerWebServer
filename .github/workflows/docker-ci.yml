@@ -1,0 +1,44 @@
+name: docker-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+
+      - name: ShellCheck scripts
+        run: shellcheck scripts/*.sh
+
+      - name: Build image
+        run: ./scripts/manage.sh build
+
+      - name: Run container and wait for healthy
+        run: ./scripts/manage.sh run
+
+      - name: Functional & security checks
+        run: ./scripts/manage.sh test
+
+      - name: Crash / self-healing test
+        run: ./scripts/manage.sh crash-test
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: codealpha/webserver:latest
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Logs on failure
+        if: failure()
+        run: docker logs codealpha-web || true

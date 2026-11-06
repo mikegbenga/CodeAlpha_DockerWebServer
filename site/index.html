@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CodeAlpha · Dockerized Web Server</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">CodeAlpha DevOps Internship · Task 4</p>
+    <h1>NGINX web server, running in Docker</h1>
+    <p class="lede">This page is served by a hardened, non-root NGINX container with a health check,
+      resource limits, a read-only filesystem, structured logs and Prometheus metrics.</p>
+  </header>
+
+  <main class="grid">
+    <article>
+      <h2>Containerized</h2>
+      <p>Built from <code>nginx-unprivileged:alpine</code>. The image is small and pinned, and NGINX runs as UID 101.</p>
+    </article>
+    <article>
+      <h2>Self-healing</h2>
+      <p><code>HEALTHCHECK</code> probes <a href="/healthz">/healthz</a> every 15&nbsp;s and the restart policy brings the container back.</p>
+    </article>
+    <article>
+      <h2>Observable</h2>
+      <p>JSON access logs go to <code>docker logs</code>, and <code>stub_status</code> is exported to Prometheus.</p>
+    </article>
+    <article>
+      <h2>Hardened</h2>
+      <p>Read-only root FS, <code>cap_drop: ALL</code>, no-new-privileges, security headers, rate limiting.</p>
+    </article>
+  </main>
+
+  <section class="status">
+    <h2>Live server status</h2>
+    <p id="health">checking…</p>
+  </section>
+
+  <footer>Michael Gbenga Abajemito · CodeAlpha_DockerWebServer</footer>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
