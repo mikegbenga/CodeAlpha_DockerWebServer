@@ -124,7 +124,7 @@ cmd_crash_test() {
   wait_healthy
 }
 
-usage() { sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; }
 
 case "${1:-}" in
   build|run|start|stop|restart|pause|unpause|rm|clean|status|health|logs|stats|inspect|exec|top|events|test)
